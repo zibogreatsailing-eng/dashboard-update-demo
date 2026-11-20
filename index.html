@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="zh-CN">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>看板更新测试</title>
+<style>
+body{font:16px/1.6 system-ui,sans-serif;margin:3rem auto;padding:0 1rem;max-width:36rem;background:#fff7f3;color:#48334a}
+main{background:white;border:1px solid #ebd6e0;border-radius:14px;padding:1.5rem}
+</style>
+<main><h1>看板更新测试</h1><p id="status" role="status">正在读取测试数据…</p></main>
+<script>
+const status = document.getElementById('status');
+let refreshing = false;
+async function refresh() {
+  if (refreshing) return;
+  refreshing = true;
+  try {
+    const response = await fetch('./status.json?t=' + Date.now(), {cache: 'no-store'});
+    if (!response.ok) throw new Error('数据读取失败');
+    const {version, count} = await response.json();
+    status.textContent = '测试版 ' + version + ' · 模拟项目数 ' + count;
+  } catch {
+    status.textContent = '测试数据暂不可用，稍后自动重试。';
+  } finally {
+    refreshing = false;
+  }
+}
+if (location.protocol === 'file:') {
+  status.textContent = '本地预览 · 测试版 1 · 模拟项目数 3。自动更新将在发布后的网页地址上运行。';
+} else {
+  refresh();
+  setInterval(refresh, 10000);
+}
+</script>
+</html>
